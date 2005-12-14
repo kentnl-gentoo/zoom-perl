@@ -1,4 +1,4 @@
-# $Id: Z3950.pm,v 1.1 2005-10-13 13:11:17 mike Exp $
+# $Id: Z3950.pm,v 1.1 2005/10/13 13:11:17 mike Exp $
 
 use strict;
 use warnings;

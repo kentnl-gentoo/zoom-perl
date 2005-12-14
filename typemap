@@ -1,4 +1,4 @@
-# $Id: typemap,v 1.6 2005-12-06 23:15:56 mike Exp $
+# $Id: typemap,v 1.6 2005/12/06 23:15:56 mike Exp $
 
 ZOOM_connection					T_PTROBJ
 ZOOM_connection *				T_PTROBJ

@@ -1,4 +1,4 @@
-# $Id: ZOOM.pm,v 1.4 2005-12-14 11:11:55 mike Exp $
+# $Id: ZOOM.pm,v 1.4 2005/12/14 11:11:55 mike Exp $
 
 package Net::Z3950::ZOOM; 
 

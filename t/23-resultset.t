@@ -1,4 +1,4 @@
-# $Id: 23-resultset.t,v 1.3 2005-11-07 15:48:25 mike Exp $
+# $Id: 23-resultset.t,v 1.3 2005/11/07 15:48:25 mike Exp $
 
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl 23-resultset.t'

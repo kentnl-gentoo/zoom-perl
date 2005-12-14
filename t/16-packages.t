@@ -1,4 +1,4 @@
-# $Id: 16-packages.t,v 1.10 2005-12-14 09:30:58 mike Exp $
+# $Id: 16-packages.t,v 1.10 2005/12/14 09:30:58 mike Exp $
 
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl 16-packages.t'

@@ -1,4 +1,4 @@
-# $Id: zoomtst1.pl,v 1.3 2005-12-14 11:17:30 mike Exp $
+# $Id: zoomtst1.pl,v 1.3 2005/12/14 11:17:30 mike Exp $
 #
 # See ../README for a description of this program.
 # perl -I../../blib/lib -I../../blib/arch zoomtst1.pl <target> <query>

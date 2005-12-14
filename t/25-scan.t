@@ -1,4 +1,4 @@
-# $Id: 25-scan.t,v 1.2 2005-11-09 17:08:31 mike Exp $
+# $Id: 25-scan.t,v 1.2 2005/11/09 17:08:31 mike Exp $
 
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl 25-scan.t'

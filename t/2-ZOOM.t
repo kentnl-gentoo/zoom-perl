@@ -1,4 +1,4 @@
-# $Id: 2-ZOOM.t,v 1.9 2005-11-16 16:25:02 mike Exp $
+# $Id: 2-ZOOM.t,v 1.9 2005/11/16 16:25:02 mike Exp $
 
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl 2-ZOOM.t'

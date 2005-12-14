@@ -1,4 +1,4 @@
-# $Id: 14-sorting.t,v 1.6 2005-11-18 17:53:53 mike Exp $
+# $Id: 14-sorting.t,v 1.6 2005/11/18 17:53:53 mike Exp $
 
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl 14-sorting.t'

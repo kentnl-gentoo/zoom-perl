@@ -1,4 +1,4 @@
-$Id: README,v 1.2 2005-12-09 10:35:46 mike Exp $
+$Id: README,v 1.2 2005/12/09 10:35:46 mike Exp $
 
 This area contains sample programs that exercise all three of the APIs
 supported by this module.  The programs for each API are contained in

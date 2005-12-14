@@ -1,4 +1,4 @@
-# $Id: 1-Net-Z3950-ZOOM.t,v 1.13 2005-11-16 16:24:42 mike Exp $
+# $Id: 1-Net-Z3950-ZOOM.t,v 1.13 2005/11/16 16:24:42 mike Exp $
 
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl 1-Net-Z3950-ZOOM.t'
