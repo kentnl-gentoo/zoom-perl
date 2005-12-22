@@ -1,4 +1,4 @@
-/* $Id: ZOOM.xs,v 1.31 2005/11/16 16:10:13 mike Exp $ */
+/* $Id: ZOOM.xs,v 1.36 2005/12/22 12:37:58 mike Exp $ */
 
 #include "EXTERN.h"
 #include "perl.h"
@@ -79,36 +79,30 @@ MODULE = Net::Z3950::ZOOM		PACKAGE = Net::Z3950::ZOOM		PREFIX=ZOOM_
 PROTOTYPES: ENABLE
 
 
-# TESTED
 ZOOM_connection
 ZOOM_connection_new(host, portnum)
 	const char* host
 	int portnum
 
-# TESTED
 ZOOM_connection
 ZOOM_connection_create(options)
 	ZOOM_options options
 
-# TESTED
 void
 ZOOM_connection_connect(c, host, portnum)
 	ZOOM_connection	c
 	const char* host
 	int portnum
 
-# TESTED
 void
 ZOOM_connection_destroy(c)
 	ZOOM_connection	c
 
-# TESTED
 const char *
 ZOOM_connection_option_get(c, key)
 	ZOOM_connection	c
 	const char *key
 
-# TESTED
 struct datachunk
 ZOOM_connection_option_getl(c, key, len)
 	ZOOM_connection	c
@@ -121,7 +115,6 @@ ZOOM_connection_option_getl(c, key, len)
 		RETVAL
 		len
 
-# TESTED
 void
 ZOOM_connection_option_set(c, key, val)
 	ZOOM_connection	c
@@ -134,7 +127,6 @@ ZOOM_connection_option_set(c, key, val)
 # is an opaque pointer.  The underlying C function can then use this
 # along with `len' to Do The Right Thing.
 #
-# TESTED
 void
 ZOOM_connection_option_setl(c, key, val, len)
 	ZOOM_connection	c
@@ -154,24 +146,24 @@ ZOOM_connection_option_setl(c, key, val, len)
 # support for const char**, but who can blame it?  If you ask me, the
 # whole "const" thing was well-intentioned by ghastly mistake.
 #
-# TESTED
 int
 ZOOM_connection_error(c, cp, addinfo)
 	ZOOM_connection	c
 	char* &cp
 	char* &addinfo
 	CODE:
+		{
 		const char *ccp, *caddinfo;
 		RETVAL = ZOOM_connection_error(c, &ccp, &caddinfo);
 		cp = (char*) ccp;
 		addinfo = (char*) caddinfo;
+		}
 	OUTPUT:
 		RETVAL
 		cp
 		addinfo
 
 # See comments for ZOOM_connection_error() above
-# TESTED
 int
 ZOOM_connection_error_x(c, cp, addinfo, diagset)
 	ZOOM_connection	c
@@ -179,87 +171,77 @@ ZOOM_connection_error_x(c, cp, addinfo, diagset)
 	const char * &addinfo
 	const char * &diagset
 	CODE:
+		{
 		const char *ccp, *caddinfo, *cdset;
 		RETVAL = ZOOM_connection_error_x(c, &ccp, &caddinfo, &cdset);
 		cp = (char*) ccp;
 		addinfo = (char*) caddinfo;
 		diagset = (char*) cdset;
+		}
 	OUTPUT:
 		RETVAL
 		cp
 		addinfo
 		diagset
 
-# TESTED
 int
 ZOOM_connection_errcode(c)
 	ZOOM_connection	c
 
-# TESTED
 const char *
 ZOOM_connection_errmsg(c)
 	ZOOM_connection	c
 
-# TESTED
 const char *
 ZOOM_connection_addinfo(c)
 	ZOOM_connection	c
 
-# TESTED
 const char *
 ZOOM_connection_diagset(c)
 	ZOOM_connection	c
 
-# TESTED
 const char *
 ZOOM_diag_str(error)
 	int error
 
-# TESTED
 ZOOM_resultset
 ZOOM_connection_search(arg0, q)
 	ZOOM_connection	arg0
 	ZOOM_query q
 
-# TESTED
 ZOOM_resultset
 ZOOM_connection_search_pqf(c, q)
 	ZOOM_connection c
 	const char *q
 
-# TESTED
 void
 ZOOM_resultset_destroy(r)
 	ZOOM_resultset r
 
-# TESTED
 const char *
 ZOOM_resultset_option_get(r, key)
 	ZOOM_resultset r
 	const char* key
 
-# TESTED
 void
 ZOOM_resultset_option_set(r, key, val)
 	ZOOM_resultset r
 	const char* key
 	const char* val
 
-# TESTED
 size_t
 ZOOM_resultset_size(r)
 	ZOOM_resultset r
 
-# TESTED
 SV *
 ZOOM_resultset_records(r, start, count, return_records)
 	ZOOM_resultset r
 	size_t start
 	size_t count
 	int return_records
-	INIT:
-		ZOOM_record *recs = 0;
 	CODE:
+		{
+		ZOOM_record *recs = 0;
 		if (return_records)
 			recs = (ZOOM_record*) xmalloc(count * sizeof *recs);
 		ZOOM_resultset_records(r, recs, start, count);
@@ -275,22 +257,20 @@ ZOOM_resultset_records(r, start, count, return_records)
 		} else {
 			RETVAL = &PL_sv_undef;
 		}
+		}
 	OUTPUT:
 		RETVAL
 
-# TESTED
 ZOOM_record
 ZOOM_resultset_record(s, pos)
 	ZOOM_resultset s
 	size_t pos
 
-# TESTED
 ZOOM_record
 ZOOM_resultset_record_immediate(s, pos)
 	ZOOM_resultset s
 	size_t pos
 
-# TESTED
 void
 ZOOM_resultset_cache_reset(r)
 	ZOOM_resultset r
@@ -302,7 +282,6 @@ ZOOM_resultset_sort(r, sort_type, sort_spec)
 	const char* sort_type
 	const char* sort_spec
 
-# TESTED
 int
 ZOOM_resultset_sort1(r, sort_type, sort_spec)
 	ZOOM_resultset r
@@ -311,7 +290,6 @@ ZOOM_resultset_sort1(r, sort_type, sort_spec)
 
 # See "typemap" for discussion of the "const char *" return-type.
 #
-# TESTED
 ### but should use datachunk for in some (not all!) cases.
 const char *
 ZOOM_record_get(rec, type, len)
@@ -322,50 +300,52 @@ ZOOM_record_get(rec, type, len)
 		RETVAL
 		len
 
-# TESTED
 void
 ZOOM_record_destroy(rec)
 	ZOOM_record rec
 
-# TESTED
 ZOOM_record
 ZOOM_record_clone(srec)
 	ZOOM_record srec
 
-# TESTED
 ZOOM_query
 ZOOM_query_create()
 
-# TESTED
 void
 ZOOM_query_destroy(s)
 	ZOOM_query s
 
-# TESTED
 int
 ZOOM_query_cql(s, str)
 	ZOOM_query s
 	const char* str
 
-# TESTED
+int
+ZOOM_query_cql2rpn(s, str, conn)
+	ZOOM_query s
+	const char* str
+	ZOOM_connection conn
+
 int
 ZOOM_query_prefix(s, str)
 	ZOOM_query s
 	const char* str
 
-# TESTED
 int
 ZOOM_query_sortby(s, criteria)
 	ZOOM_query	s
 	const char *	criteria
 
-# TESTED
 ZOOM_scanset
 ZOOM_connection_scan(c, startterm)
 	ZOOM_connection c
 	const char* startterm
 
-# TESTED
+ZOOM_scanset
+ZOOM_connection_scan1(c, startterm)
+	ZOOM_connection c
+	ZOOM_query startterm
+
 const char *
 ZOOM_scanset_term(scan, pos, occ, len)
 	ZOOM_scanset scan
@@ -377,7 +357,6 @@ ZOOM_scanset_term(scan, pos, occ, len)
 		occ
 		len
 
-# TESTED
 const char *
 ZOOM_scanset_display_term(scan, pos, occ, len)
 	ZOOM_scanset scan
@@ -389,23 +368,19 @@ ZOOM_scanset_display_term(scan, pos, occ, len)
 		occ
 		len
 
-# TESTED
 size_t
 ZOOM_scanset_size(scan)
 	ZOOM_scanset scan
 
-# TESTED
 void
 ZOOM_scanset_destroy(scan)
 	ZOOM_scanset scan
 
-# TESTED
 const char *
 ZOOM_scanset_option_get(scan, key)
 	ZOOM_scanset	scan
 	const char *	key
 
-# TESTED
 void
 ZOOM_scanset_option_set(scan, key, val)
 	ZOOM_scanset	scan
@@ -418,13 +393,13 @@ ZOOM_scanset_option_set(scan, key, val)
 # function in the callback_block -- is unavailable to us, as the
 # underlying C function doesn't give the block back.
 #
-# TESTED
 void
 ZOOM_options_set_callback(opt, function, handle)
 	ZOOM_options opt
 	SV* function;
 	SV* handle;
 	CODE:
+		{
 		/* The tiny amount of memory allocated here is never
 	         * released, as options_destroy() doesn't do anything
 	         * to the callback information.  Not a big deal.
@@ -440,29 +415,25 @@ ZOOM_options_set_callback(opt, function, handle)
 		SvREFCNT(block->handle);
 		ZOOM_options_set_callback(opt, __ZOOM_option_callback,
 					  (void*) block);
+		}
 
-# TESTED
 ZOOM_options
 ZOOM_options_create()
 
-# TESTED
 ZOOM_options
 ZOOM_options_create_with_parent(parent)
 	ZOOM_options parent
 
-# TESTED
 ZOOM_options
 ZOOM_options_create_with_parent2(parent1, parent2)
 	ZOOM_options parent1
 	ZOOM_options parent2
 
-# TESTED
 const char *
 ZOOM_options_get(opt, name)
 	ZOOM_options opt
 	const char* name
 
-# TESTED
 struct datachunk
 ZOOM_options_getl(opt, name, len)
 	ZOOM_options opt
@@ -475,14 +446,12 @@ ZOOM_options_getl(opt, name, len)
 		RETVAL
 		len
 
-# TESTED
 void
 ZOOM_options_set(opt, name, v)
 	ZOOM_options opt
 	const char* name
 	const char* v
 
-# TESTED
 void
 ZOOM_options_setl(opt, name, value, len)
 	ZOOM_options opt
@@ -490,56 +459,47 @@ ZOOM_options_setl(opt, name, value, len)
 	opaquechar* value
 	int len
 
-# TESTED
 void
 ZOOM_options_destroy(opt)
 	ZOOM_options opt
 
-# TESTED
 int
 ZOOM_options_get_bool(opt, name, defa)
 	ZOOM_options opt
 	const char* name
 	int defa
 
-# TESTED
 int
 ZOOM_options_get_int(opt, name, defa)
 	ZOOM_options opt
 	const char* name
 	int defa
 
-# TESTED
 void
 ZOOM_options_set_int(opt, name, value)
 	ZOOM_options opt
 	const char* name
 	int value
 
-# TESTED
 ZOOM_package
 ZOOM_connection_package(c, options)
 	ZOOM_connection	c
 	ZOOM_options	options
 
-# TESTED
 void
 ZOOM_package_destroy(p)
 	ZOOM_package	p
 
-# TESTED
 void
 ZOOM_package_send(p, type)
 	ZOOM_package	p
 	const char *	type
 
-# TESTED
 const char *
 ZOOM_package_option_get(p, key)
 	ZOOM_package	p
 	const char *	key
 
-# TESTED
 void
 ZOOM_package_option_set(p, key, val)
 	ZOOM_package	p
@@ -556,4 +516,52 @@ ZOOM_event(no, cs)
 int
 ZOOM_connection_last_event(cs)
 	ZOOM_connection	cs
+
+# ----------------------------------------------------------------------------
+# What follows is the YAZ logging API.  This is not strictly part of
+# ZOOM, but it's so useful that it would be silly to omit.
+
+int
+yaz_log_mask_str(str)
+	const char *str
+
+int
+yaz_log_module_level(name)
+	const char *name
+
+void
+yaz_log_init(level, prefix, name)
+	int level
+	const char *prefix
+	const char *name
+
+void
+yaz_log_init_file(fname)
+	const char *fname
+
+void
+yaz_log_init_level(level)
+	int level
+
+void
+yaz_log_init_prefix(prefix)
+	const char *prefix
+
+void
+yaz_log_time_format(fmt)
+	const char *fmt
+
+void
+yaz_log_init_max_size(mx)
+	int mx
+
+# <stdarg.h> interfaces are horrible to code for a Perl-C interface
+# layer.  Instead, we expect Perl applications to construct the
+# message themselves, and pass it in as an opaque lump.
+void
+yaz_log(level, str)
+	int level
+	const char *str
+	CODE:
+		yaz_log(level, "%s", str);
 

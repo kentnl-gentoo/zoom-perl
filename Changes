@@ -1,15 +1,52 @@
-$Id: Changes,v 1.5 2005/12/14 11:19:04 mike Exp $
+$Id: Changes,v 1.14 2005/12/22 14:13:47 mike Exp $
 
 Revision history for Perl extension Net::Z3950::ZOOM.
+
+1.01  Thu Dec 22 14:13:34 GMT 2005
+	- Place some CODE: chunks in "ZOOM.xs" inside curly brackets
+	  so that the declarations they begin with are at the start of
+	  the block.  This avoid mixed code/declarations.  (The
+	  "correct" solution is to use INIT: clauses in the XS file,
+	  but they don't seem to work: the code in them is slapped
+	  down right next to the CODE:, so declarations are not
+	  acceptable there either.)
+	- Add new function Net::Z3950::ZOOM::connection_scan1(), which
+	  uses a query object to indicate the start-term.  This opens
+	  the way for using CQL queries for scanning once the
+	  underlying ZOOM-C code supports this.
+	- NOTE BACKWARDS-INCOMPATIBLE CHANGE: The ZOOM::Connection
+	  method scan() is renamed scan_pqf(), and a new scan() method
+	  is introduced which calls the underlying scan1() function.
+	  Thus the scan()/scan_pqf() dichotomy is consistent with that
+	  between search()/search_pqf().
+	- The tests t/15-scan.t and t/25-scan.t now also test for
+	  scanning by CQL query.  To support these tests, a new files
+	  is added to the distribution, "samples/cql/pqf.properties"
+	- Remove nonsensical clause about CQL sort-specifications from
+	  the documentation.
+	- Add new function Net::Z3950::ZOOM::query_cql2rpn(), for
+	  client-side CQL compilation.
+	- Add new ZOOM::Query::CQL2RPN class, encapsulating CQL
+	  compiler functionality as a Query subclass.
+	- Add two new error-codes, CQL_PARSE and CQL_TRANSFORM,
+	  returned by the client-side CQL facilities.
+	- The test-scripts t/12-query.t and t/22-query.t are extended
+	  to also test client-side CQL compilation.
+	- Add all the yaz_log*() functions within the Net::Z3950::ZOOM
+	  namespace. 
+	- Add new ZOOM::Log class for logging, providing aliases for
+	  the functions in the Net::Z3950::ZOOM layer.
+	- Add diagnostic set to rendering of Exception objects.
+	- Documentation added for CQL compilation and logging.
+
+1.00  Wed Dec 14 11:18:33 GMT 2005
+	- First distributed version.
 
 0.01  Fri Oct  7 16:14:20 2005
 	- original version; created by h2xs 1.23 with options
 		--name=Net::Z3950::ZOOM --compat-version=5.8.0 \
 		--omit-constant --skip-exporter --skip-ppport \
 		--autogen-xsubs yaz/zoom.h -lyaz -lxml2
-
-1.00  Wed Dec 14 11:18:33 GMT 2005
-	- First distributed version.
 
 --
 

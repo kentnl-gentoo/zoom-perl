@@ -1,4 +1,4 @@
-# $Id: ZOOM.pm,v 1.21 2005/11/24 15:39:20 mike Exp $
+# $Id: ZOOM.pm,v 1.25 2005/12/22 12:48:15 mike Exp $
 
 use strict;
 use warnings;
@@ -40,6 +40,8 @@ sub TIMEOUT { Net::Z3950::ZOOM::ERROR_TIMEOUT }
 sub UNSUPPORTED_PROTOCOL { Net::Z3950::ZOOM::ERROR_UNSUPPORTED_PROTOCOL }
 sub UNSUPPORTED_QUERY { Net::Z3950::ZOOM::ERROR_UNSUPPORTED_QUERY }
 sub INVALID_QUERY { Net::Z3950::ZOOM::ERROR_INVALID_QUERY }
+sub CQL_PARSE { Net::Z3950::ZOOM::ERROR_CQL_PARSE }
+sub CQL_TRANSFORM { Net::Z3950::ZOOM::ERROR_CQL_TRANSFORM }
 # The following are added specifically for this OO interface
 sub CREATE_QUERY { 20001 }
 sub QUERY_CQL { 20002 }
@@ -48,6 +50,7 @@ sub SORTBY { 20004 }
 sub CLONE { 20005 }
 sub PACKAGE { 20006 }
 sub SCANTERM { 20007 }
+sub LOGLEVEL { 20008 }
 
 # The "Event" package contains constants returned by last_event()
 package ZOOM::Event;
@@ -84,6 +87,8 @@ sub diag_str {
 	return "can't create package";
     } elsif ($code == ZOOM::Error::SCANTERM) {
 	return "can't retrieve term from scan-set";
+    } elsif ($code == ZOOM::Error::LOGLEVEL) {
+	return "unregistered log-level";
     }
 
     return Net::Z3950::ZOOM::diag_str($code);
@@ -135,6 +140,7 @@ sub render {
     my $this = shift();
     my $res = "ZOOM error " . $this->code() . ' "' . $this->message() . '"';
     $res .= ' (addinfo: "' . $this->addinfo() . '")' if $this->addinfo();
+    $res .= " from diag-set '" . $this->diagset() . "'" if $this->diagset();
     return $res;
 }
 
@@ -281,7 +287,7 @@ sub new {
     return $conn;
 }
 
-# PRIVATE to this class
+# PRIVATE to this class and to ZOOM::Query::CQL2RPN::new()
 sub _conn {
     my $this = shift();
 
@@ -396,13 +402,23 @@ sub search_pqf {
     return _new ZOOM::ResultSet($this, $pqf, $_rs);
 }
 
-sub scan {
+sub scan_pqf {
     my $this = shift();
     my($startterm) = @_;
 
     my $_ss = Net::Z3950::ZOOM::connection_scan($this->_conn(), $startterm);
     $this->_check();
     return _new ZOOM::ScanSet($this, $startterm, $_ss);
+}
+
+sub scan {
+    my $this = shift();
+    my($query) = @_;
+
+    my $_ss = Net::Z3950::ZOOM::connection_scan1($this->_conn(),
+						 $query->_query());
+    $this->_check();
+    return _new ZOOM::ScanSet($this, $query, $_ss);
 }
 
 sub package {
@@ -472,6 +488,25 @@ sub new {
 	or ZOOM::_oops(ZOOM::Error::CREATE_QUERY);
     Net::Z3950::ZOOM::query_cql($q, $string) == 0
 	or ZOOM::_oops(ZOOM::Error::QUERY_CQL, $string);
+
+    return bless {
+	_query => $q,
+    }, $class;
+}
+
+
+package ZOOM::Query::CQL2RPN;
+our @ISA = qw(ZOOM::Query);
+
+sub new {
+    my $class = shift();
+    my($string, $conn) = @_;
+
+    my $q = Net::Z3950::ZOOM::query_create()
+	or ZOOM::_oops(ZOOM::Error::CREATE_QUERY);
+    # check() throws the exception we want; but we only want it on failure!
+    Net::Z3950::ZOOM::query_cql2rpn($q, $string, $conn->_conn()) == 0
+	or $conn->_check();
 
     return bless {
 	_query => $q,
@@ -719,7 +754,12 @@ sub _new {
 
     return bless {
 	conn => $conn,
-	startterm => $startterm,
+	startterm => $startterm,# This is not currently used, which is
+				# just as well since it could be
+				# either a string (when the SS is
+				# created with scan()) or a
+				# ZOOM::Query object (when it's
+				# created with scan1())
 	_ss => $_ss,
     }, $class;
 }
@@ -846,6 +886,43 @@ sub destroy {
 
     Net::Z3950::ZOOM::package_destroy($this->_p());
     $this->{_p} = undef;
+}
+
+
+# There follows trivial support for YAZ logging.  This is wired out
+# into the Net::Z3950::ZOOM package, and we here provide wrapper
+# functions -- nothing more than aliases, really -- in the ZOOM::Log
+# package.  There really is no point in inventing an OO interface.
+#
+# Passing @_ directly to the underlying Net::Z3950::ZOOM::* functions
+# doesn't work, for reasons that I can't begin to fathom, and that
+# don't particularly interest me.  Unpacking into scalars and passing
+# those _does_ work, so that's what we do.
+
+package ZOOM::Log;
+
+sub mask_str      { my($a) = @_; Net::Z3950::ZOOM::yaz_log_mask_str($a); }
+sub module_level  { my($a) = @_; Net::Z3950::ZOOM::yaz_log_module_level($a); }
+sub init          { my($a, $b, $c) = @_;
+		    Net::Z3950::ZOOM::yaz_log_init($a, $b, $c) }
+sub init_file     { my($a) = @_; Net::Z3950::ZOOM::yaz_log_init_file($a) }
+sub init_level    { my($a) = @_; Net::Z3950::ZOOM::yaz_log_init_level($a) }
+sub init_prefix   { my($a) = @_; Net::Z3950::ZOOM::yaz_log_init_prefix($a) }
+sub time_format   { my($a) = @_; Net::Z3950::ZOOM::yaz_log_time_format($a) }
+sub init_max_size { my($a) = @_; Net::Z3950::ZOOM::yaz_log_init_max_size($a) }
+
+sub log {
+    my($level, @message) = @_;
+
+    if ($level !~ /^(0x)?\d+$/) {
+	# Assuming its log-level name, we look it up.
+	my $num = module_level($level);
+	ZOOM::_oops(ZOOM::Error::LOGLEVEL, $level)
+	    if $num == 0;
+	$level = $num;
+    }
+
+    Net::Z3950::ZOOM::yaz_log($level, join("", @message));
 }
 
 

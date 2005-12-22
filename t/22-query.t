@@ -1,12 +1,14 @@
-# $Id: 22-query.t,v 1.2 2005/11/26 16:58:03 mike Exp $
+# $Id: 22-query.t,v 1.6 2005/12/22 09:25:14 mike Exp $
 
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl 22-query.t'
 
 use strict;
 use warnings;
-use Test::More tests => 20;
+use Test::More tests => 32;
 BEGIN { use_ok('ZOOM') };
+
+#ZOOM::Log::init_level(ZOOM::Log::mask_str("zoom"));
 
 my $q;
 eval { $q = new ZOOM::Query() };
@@ -58,22 +60,58 @@ $conn->option(preferredRecordSyntax => "usmarc");
 ok(1, "[no need to create empty query]");
 eval { $q = new ZOOM::Query::PQF('@and @attr 1=4 utah @attr 1=62 epicenter') };
 ok(!$@, "created PQF query");
+check_record($conn, $q);
+$q->destroy();
 
+# Now try a CQL query: this will fail due to lack of server support
+ok(1, "[no need to create empty query]");
+eval { $q = new ZOOM::Query::CQL('title=utah and description=epicenter') };
+ok(!$@, "created CQL query");
 my $rs;
 eval { $rs = $conn->search($q) };
-ok(!$@, "search");
-
-my $n = $rs->size();
-ok($n == 1, "found 1 record as expected");
-
-my $rec = $rs->record(0);
-ok(1, "got record idenfified by query");
-
-my $data = $rec->render();
-ok(1, "rendered record");
-ok($data =~ /^035 +\$a ESDD0006$/m, "record is the expected one");
-
-$rs->destroy();
+ok($@ && $@->isa("ZOOM::Exception") &&
+   $@->code() == 107 && $@->diagset() eq "Bib-1",
+   "query rejected: error " . $@->code());
 $q->destroy();
+
+# Client-side compiled CQL: this will fail due to lack of config-file
+ok(1, "[no need to create empty query]");
+eval { $q = new ZOOM::Query::CQL2RPN('title=utah and description=epicenter',
+				     $conn) };
+ok($@ && $@->isa("ZOOM::Exception") &&
+   $@->code() == ZOOM::Error::CQL_TRANSFORM && $@->diagset() eq "ZOOM",
+   "can't make CQL2RPN query: error " . $@->code());
+
+# Finally, do a successful client-compiled CQL search
+ok(1, "[no need to create empty query]");
+$conn->option(cqlfile => "samples/cql/pqf.properties");
+eval { $q = new ZOOM::Query::CQL2RPN('title=utah and description=epicenter',
+				     $conn) };
+ok(!$@, "created CQL2RPN query: \@=$@");
+check_record($conn, $q);
+$q->destroy();
+
 $conn->destroy();
 ok(1, "destroyed all objects");
+
+
+sub check_record {
+    my($conn, $q) = @_;
+
+    my $rs;
+    eval { $rs = $conn->search($q) };
+    ok(!$@, "search");
+    die $@ if $@;
+
+    my $n = $rs->size();
+    ok($n == 1, "found 1 record as expected");
+
+    my $rec = $rs->record(0);
+    ok(1, "got record idenfified by query");
+
+    my $data = $rec->render();
+    ok(1, "rendered record");
+    ok($data =~ /^035 +\$a ESDD0006$/m, "record is the expected one");
+
+    $rs->destroy();
+}
