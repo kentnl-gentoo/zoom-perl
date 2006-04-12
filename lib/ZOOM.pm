@@ -1,4 +1,4 @@
-# $Id: ZOOM.pm,v 1.28 2006/04/03 14:00:00 mike Exp $
+# $Id: ZOOM.pm,v 1.33 2006/04/12 12:00:48 mike Exp $
 
 use strict;
 use warnings;
@@ -63,6 +63,7 @@ sub SEND_APDU { Net::Z3950::ZOOM::EVENT_SEND_APDU }
 sub RECV_APDU { Net::Z3950::ZOOM::EVENT_RECV_APDU }
 sub RECV_RECORD { Net::Z3950::ZOOM::EVENT_RECV_RECORD }
 sub RECV_SEARCH { Net::Z3950::ZOOM::EVENT_RECV_SEARCH }
+sub ZEND { Net::Z3950::ZOOM::EVENT_END }
 
 # ----------------------------------------------------------------------------
 
@@ -91,6 +92,17 @@ sub diag_str {
     }
 
     return Net::Z3950::ZOOM::diag_str($code);
+}
+
+sub event_str {
+    return Net::Z3950::ZOOM::event_str(@_);
+}
+
+sub event {
+    my($connsref) = @_;
+
+    my @_connsref = map { $_->_conn() } @$connsref;
+    return Net::Z3950::ZOOM::event(\@_connsref);
 }
 
 sub _oops {
@@ -276,27 +288,29 @@ sub new {
     my $class = shift();
     my($host, $port, @options) = @_;
 
-    my $_conn = Net::Z3950::ZOOM::connection_new($host, $port || 0);
+    my $_opts = Net::Z3950::ZOOM::options_create();
+    while (@options >= 2) {
+	my $key = shift(@options);
+	my $val = shift(@options);
+	Net::Z3950::ZOOM::options_set($_opts, $key, $val);
+    }
+
+    die "Odd number of options specified"
+	if @options;
+
+    my $_conn = Net::Z3950::ZOOM::connection_create($_opts);
+    Net::Z3950::ZOOM::connection_connect($_conn, $host, $port || 0);
     my $conn = bless {
 	host => $host,
 	port => $port,
 	_conn => $_conn,
     };
 
-    while (@options >= 2) {
-	my $key = shift(@options);
-	my $val = shift(@options);
-	$conn->option($key, $val);
-    }
-
-    die "Odd number of options specified"
-	if @options;
-
     $conn->_check();
     return $conn;
 }
 
-# PRIVATE to this class and to ZOOM::Query::CQL2RPN::new()
+# PRIVATE to this class, to ZOOM::event() and to ZOOM::Query::CQL2RPN::new()
 sub _conn {
     my $this = shift();
 
@@ -441,6 +455,12 @@ sub package {
 	or ZOOM::_oops(ZOOM::Error::PACKAGE);
 
     return _new ZOOM::Package($this, $options, $_p);
+}
+
+sub last_event {
+    my $this = shift();
+
+    return Net::Z3950::ZOOM::connection_last_event($this->_conn());
 }
 
 sub destroy {

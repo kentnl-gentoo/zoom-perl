@@ -1,4 +1,4 @@
-# $Id: ZOOM.pm,v 1.12 2006/04/03 13:57:46 mike Exp $
+# $Id: ZOOM.pm,v 1.18 2006/04/07 12:07:23 mike Exp $
 
 package Net::Z3950::ZOOM; 
 
@@ -6,7 +6,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 require XSLoader;
 XSLoader::load('Net::Z3950::ZOOM', $VERSION);
@@ -52,6 +52,7 @@ sub EVENT_SEND_APDU { 6 }
 sub EVENT_RECV_APDU { 7 }
 sub EVENT_RECV_RECORD { 8 }
 sub EVENT_RECV_SEARCH { 9 }
+sub EVENT_END { 10 }		# In YAZ 2.1.17 and later
 
 
 =head1 NAME
@@ -79,6 +80,42 @@ To enforce the don't-use-this-module prohibition, I am not even going
 to document it.  If you really, really, really want to use it, then it
 pretty much follows the API described in the ZOOM-C documentation at
 http://www.indexdata.dk/yaz/doc/zoom.tkl
+
+The only additional (non-ZOOM-C) function provided by this module is
+C<event_str()>, which takes as its argument an event code such as
+C<Net::Z3950::ZOOM::EVENT_SEND_APDU>, and returns a corresponding
+short string.
+
+=cut
+
+sub event_str {
+    my($code) = @_;
+
+    if ($code == EVENT_NONE) {
+	return "none";
+    } elsif ($code == EVENT_CONNECT) {
+	return "connect";
+    } elsif ($code == EVENT_SEND_DATA) {
+	return "send data";
+    } elsif ($code == EVENT_RECV_DATA) {
+	return "receive data";
+    } elsif ($code == EVENT_TIMEOUT) {
+	return "timeout";
+    } elsif ($code == EVENT_UNKNOWN) {
+	return "unknown";
+    } elsif ($code == EVENT_SEND_APDU) {
+	return "send apdu";
+    } elsif ($code == EVENT_RECV_APDU) {
+	return "receive apdu";
+    } elsif ($code == EVENT_RECV_RECORD) {
+	return "receive record";
+    } elsif ($code == EVENT_RECV_SEARCH) {
+	return "receive search";
+    } elsif ($code == EVENT_END) {
+	return "end";
+    }
+    return "impossible event " . $code;
+}
 
 =head1 SEE ALSO
 
