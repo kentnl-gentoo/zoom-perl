@@ -1,4 +1,4 @@
-# $Id: 2-ZOOM.t,v 1.9 2005/11/16 16:25:02 mike Exp $
+# $Id: 2-ZOOM.t,v 1.12 2006/11/02 17:48:26 mike Exp $
 
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl 2-ZOOM.t'
@@ -18,15 +18,14 @@ ok($@ && $@->isa("ZOOM::Exception") &&
    $@->code() == ZOOM::Error::CONNECT && $@->addinfo() eq $host,
    "connection to non-existent host '$host' fails");
 
-$host = "indexdata.com/gils";
+$host = "z3950.indexdata.com/gils";
 eval { $conn = new ZOOM::Connection($host, 0) };
 ok(!$@, "connection to '$host'");
 
 $conn->destroy();
 ok(1, "destroyed connection");
 
-my $options = new ZOOM::Options();
-eval { $conn = create ZOOM::Connection($options) };
+eval { $conn = create ZOOM::Connection() };
 ok(!$@, "unconnected connection object created");
 eval { $conn->connect($host, 0) };
 ok(!$@, "delayed connection to '$host'");
@@ -76,7 +75,7 @@ my $data = $rec->render();
 ok($data =~ /^245 +\$a ISOTOPIC DATES OF ROCKS AND MINERALS$/m,
    "rendered record has expected title");
 my $raw = $rec->raw();
-ok($raw =~ /^00981n/, "raw record contains expected header");
+ok($raw =~ /^00966n/, "raw record contains expected header");
 
 $rs->destroy();
 ok(1, "destroyed result-set");

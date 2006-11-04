@@ -1,4 +1,4 @@
-# $Id: Makefile.PL,v 1.13 2006/08/31 15:47:45 mike Exp $
+# $Id: Makefile.PL,v 1.15 2006/10/04 17:13:44 mike Exp $
 
 use 5.008;
 use ExtUtils::MakeMaker;
@@ -16,7 +16,7 @@ will also need to install "libyaz-dev" in order to build this module.
 }
 
 chomp($yazver);
-check_version($yazver, "2.1.27");
+check_version($yazver, "2.1.35");
 
 # For Windows use
 # $yazinc = '-Ic:\yaz\include'
@@ -39,6 +39,7 @@ WriteMakefile(
     # OBJECT            => '$(O_FILES)', # link all the C files too
 # Use this to test for illegal code that GCC stupidly permits by default:
 #   OPTIMIZE          => "-Wdeclaration-after-statement -g -O0",
+    EXE_FILES    => [ 'samples/zoom/zselect' ],
 );
 
 

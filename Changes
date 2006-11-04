@@ -1,6 +1,32 @@
-$Id: Changes,v 1.40 2006/08/31 15:48:14 mike Exp $
+$Id: Changes,v 1.49 2006/11/04 11:48:15 mike Exp $
 
 Revision history for Perl extension Net::Z3950::ZOOM.
+
+1.13  READY TO GO
+	- ZOOM::Connection::create() may now take either a single
+	  argument, which is a ZOOM::Options object, or any even
+	  number of argument (including zero), which are key => value
+	  pairs of options to set.
+	- ZOOM::Connection::new(), having been refactored to use
+	  create(), can now also take a ZOOM::Options argument.
+	- Documentation now includes information on specifying SRW,
+	  SRU-over-GET and SRU-over-POST connections.
+	- ZOOM::ResultSet::record() throws a diagnostic if asked to
+	  retrieve records out of range for the result-set.
+	- All tests against indexdata.com are now explicitly against
+	  z3950.indexdata.com, as the identity of the former name has
+	  recently changed.
+
+1.12  (NEVER PUBLICLY RELEASED; these changes are included in 1.13)
+	- Include the useful example program samples/zoom/zselect,
+	  which is installed as part of "make install".
+	- Add ZOOM_connection_is_idle() and $conn->is_idle().
+	- Require YAZ version 2.1.35, which is the first to provide
+	  ZOOM_connection_is_idle().
+	- Fix bug in ZOOM::Connection class code that made the
+	  difficult to subclass -- when called as
+	  $class->SUPER::new(@_), the constructor blessed the new
+	  object into ZOOM::Connection rather than info the subclass.
 
 1.11  Thu Aug 31 16:47:53 BST 2006
 	- Require YAZ version 2.1.17, which has important ZOOM-C
