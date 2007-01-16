@@ -1,4 +1,4 @@
-# $Id: ZOOM.pm,v 1.42 2006/11/28 16:47:19 mike Exp $
+# $Id: ZOOM.pm,v 1.44 2007/01/16 11:17:28 mike Exp $
 
 use strict;
 use warnings;
@@ -34,7 +34,7 @@ sub MEMORY { Net::Z3950::ZOOM::ERROR_MEMORY }
 sub ENCODE { Net::Z3950::ZOOM::ERROR_ENCODE }
 sub DECODE { Net::Z3950::ZOOM::ERROR_DECODE }
 sub CONNECTION_LOST { Net::Z3950::ZOOM::ERROR_CONNECTION_LOST }
-sub INIT { Net::Z3950::ZOOM::ERROR_INIT }
+sub ZINIT { Net::Z3950::ZOOM::ERROR_INIT }
 sub INTERNAL { Net::Z3950::ZOOM::ERROR_INTERNAL }
 sub TIMEOUT { Net::Z3950::ZOOM::ERROR_TIMEOUT }
 sub UNSUPPORTED_PROTOCOL { Net::Z3950::ZOOM::ERROR_UNSUPPORTED_PROTOCOL }
@@ -499,6 +499,12 @@ sub is_idle {
     return Net::Z3950::ZOOM::connection_is_idle($this->_conn());
 }
 
+sub peek_event {
+    my $this = shift();
+
+    return Net::Z3950::ZOOM::connection_peek_event($this->_conn());
+}
+
 sub destroy {
     my $this = shift();
 
@@ -831,6 +837,7 @@ sub exception {
     my $this = shift();
 
     my($errcode, $errmsg, $addinfo, $diagset) = $this->error();
+    return undef if $errcode == 0;
     return new ZOOM::Exception($errcode, $errmsg, $addinfo, $diagset);
 }
 
