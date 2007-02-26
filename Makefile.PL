@@ -1,4 +1,4 @@
-# $Id: Makefile.PL,v 1.18 2007/01/16 11:16:57 mike Exp $
+# $Id: Makefile.PL,v 1.20 2007/02/26 14:41:24 mike Exp $
 
 use 5.008;
 use ExtUtils::MakeMaker;
@@ -16,7 +16,7 @@ will also need to install "libyaz-dev" in order to build this module.
 }
 
 chomp($yazver);
-check_version($yazver, "2.1.45");
+check_version($yazver, "2.1.50");
 
 # For Windows use
 # $yazinc = '-Ic:\yaz\include'
@@ -52,7 +52,7 @@ sub check_version {
 	($gmajor == $wmajor && $gminor < $wminor) ||
 	($gmajor == $wmajor && $gminor == $wminor && $gtrivial < $wtrivial)) {
 	print <<__EOT__;
-*** WARNING!
+*** ERROR!
 ZOOM-Perl requires at least version $want of YAZ,
 but is currently you only have version $got.
 __EOT__
