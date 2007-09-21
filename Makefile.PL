@@ -1,4 +1,6 @@
-# $Id: Makefile.PL,v 1.20 2007/02/26 14:41:24 mike Exp $
+# $Id: Makefile.PL,v 1.22 2007/09/14 10:36:43 mike Exp $
+
+# Use: perl Makefile.PL OPTIMIZE="-O0 -g -Wdeclaration-after-statement"
 
 use 5.008;
 use ExtUtils::MakeMaker;
@@ -54,7 +56,7 @@ sub check_version {
 	print <<__EOT__;
 *** ERROR!
 ZOOM-Perl requires at least version $want of YAZ,
-but is currently you only have version $got.
+but you only have version $got.
 __EOT__
 	exit 1;
     }
