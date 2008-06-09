@@ -1,4 +1,4 @@
-# $Id: Makefile.PL,v 1.24 2007/10/03 14:05:04 mike Exp $
+# $Id: Makefile.PL,v 1.26 2007-11-29 16:43:52 mike Exp $
 
 # Use: perl Makefile.PL OPTIMIZE="-O0 -g -Wdeclaration-after-statement"
 #  or: perl Makefile.PL PREFIX=/home/mike/universe
@@ -61,4 +61,14 @@ but you only have version $got.
 __EOT__
 	exit 1;
     }
+}
+
+sub MY::postamble { "debian: debian/output
+
+debian/output:
+	dpkg-buildpackage -rfakeroot -d
+	rm -rf debian/output
+	mkdir debian/output
+	mv ../libnet-z3950-zoom-perl* debian/output
+";
 }
