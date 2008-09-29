@@ -1,4 +1,4 @@
-# $Id: 16-packages.t,v 1.12 2006/04/12 12:30:09 mike Exp $
+# $Id: 16-packages.t,v 1.14 2008-09-29 15:49:13 mike Exp $
 
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl 16-packages.t'
@@ -14,13 +14,13 @@
 
 use strict;
 use warnings;
-use Test::More tests => 40;
+use Test::More tests => 39;
 
 BEGIN { use_ok('Net::Z3950::ZOOM') };
 
 
 # We will create, and destroy, a new database with a random name
-my $host = "test.indexdata.com:2118";
+my $host = "z3950.indexdata.com:2100";
 my $dbname = join("", map { chr(ord("a") + int(rand(26))) } 1..10);
 
 # Connect anonymously, and expect this to fail
@@ -41,32 +41,32 @@ makedb($conn, $dbname, 223);
 Net::Z3950::ZOOM::connection_destroy($conn);
 $conn = makeconn($host, "admin", "fish", 0);
 Net::Z3950::ZOOM::connection_option_set($conn, databaseName => $dbname);
-count_hits($conn, "the", 109);
+count_hits($conn, $dbname, "the", 109);
 
 # Now create the database and check that it is present but empty
 makedb($conn, $dbname, 0);
-count_hits($conn, "the", 0, 0);
+count_hits($conn, $dbname, "the", 114);
 
 # Trying to create the same database again will fail EEXIST
 makedb($conn, $dbname, 224);
 
 # Add a single record, and check that it can be found
 updaterec($conn, 1, content_of("samples/records/esdd0006.grs"), 0);
-count_hits($conn, "the", 0, 1);
+count_hits($conn, $dbname, "the", 0, 1);
 
 # Add the same record with the same ID: overwrite => no change
 updaterec($conn, 1, content_of("samples/records/esdd0006.grs"), 0);
-count_hits($conn, "the", 0, 1);
+count_hits($conn, $dbname, "the", 0, 1);
 
 # Add it again record with different ID => new copy added
 updaterec($conn, 2, content_of("samples/records/esdd0006.grs"), 0);
-count_hits($conn, "the", 0, 2);
+count_hits($conn, $dbname, "the", 0, 2);
 
 # Now drop the newly-created database
 dropdb($conn, $dbname, 0);
 
 # A second dropping should fail, as the database is no longer there.
-dropdb($conn, $dbname, 10004);
+dropdb($conn, $dbname, 235);
 
 
 sub makeconn {
@@ -134,7 +134,8 @@ sub dropdb {
     my($errcode, $errmsg, $addinfo) = (undef, "dummy", "dummy");
     $errcode = Net::Z3950::ZOOM::connection_error($conn, $errmsg, $addinfo);
     ok($errcode == $expected_error,
-       "database drop '$dbname'"  . ($errcode ? " refused $errcode" : ""));
+       ("database drop '$dbname'" . ($errcode ? " refused $errcode" : "") .
+	($expected_error ? " expected $expected_error but succeeded" : "")));
 
     Net::Z3950::ZOOM::package_destroy($p);
     ok(1, "destroyed dropdb package");
@@ -166,7 +167,7 @@ sub updaterec {
 
 
 sub count_hits {
-    my($conn, $query, $expected_error, $expected_count) = @_;
+    my($conn, $dbname, $query, $expected_error, $expected_count) = @_;
 
     my $rs = Net::Z3950::ZOOM::connection_search_pqf($conn, $query);
     my($errcode, $errmsg, $addinfo) = (undef, "dummy", "dummy");
