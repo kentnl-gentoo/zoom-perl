@@ -1,5 +1,3 @@
-# $Id: 25-scan.t,v 1.11 2007/08/16 17:19:35 mike Exp $
-
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl 25-scan.t'
 
@@ -14,6 +12,7 @@ my $conn;
 eval { $conn = new ZOOM::Connection($host, 0) };
 ok(!$@, "connection to '$host'");
 
+$conn->option(number => 10);
 my($ss, $n) = scan($conn, 0, "w", 10);
 
 my @terms = ();
@@ -115,6 +114,6 @@ sub scan {
 
     my $n = $ss->size();
     ok(defined $n, "got size");
-    ok($n == $nexpected, "got $n terms (expected $nexpected)");
+    ok($n == $nexpected, "got $n terms for '$startterm' (expected $nexpected)");
     return ($ss, $n);
 }

@@ -1,5 +1,3 @@
-# $Id: Makefile.PL,v 1.27 2008-09-16 12:44:28 mike Exp $
-
 # Use: perl Makefile.PL OPTIMIZE="-O0 -g -Wdeclaration-after-statement"
 #  or: perl Makefile.PL PREFIX=/home/mike/universe
 
@@ -22,8 +20,8 @@ chomp($yazver);
 check_version($yazver, "2.1.50");
 
 # For Windows use
-# $yazinc = '-Ic:\yaz\include'
-# $yazlibs = 'c:\yaz\lib\yaz.lib'
+# $yazinc = '-Ic:\yaz\include';
+# $yazlibs = 'c:\yaz\lib\yaz.lib';
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
@@ -70,5 +68,8 @@ debian/output:
 	rm -rf debian/output
 	mkdir debian/output
 	mv ../libnet-z3950-zoom-perl* debian/output
+
+debclean:
+	rm -rf debian/libnet-z3950-zoom-perl debian/output
 ";
 }
