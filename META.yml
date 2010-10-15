@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Net-Z3950-ZOOM
-version:             1.26
+version:             1.28
 abstract:            Perl extension for invoking the ZOOM-C API.
 license:             ~
 author:              

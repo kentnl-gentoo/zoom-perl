@@ -3,7 +3,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 87;
+use Test::More tests => 81;
 
 BEGIN { use_ok('ZOOM') };
 
@@ -28,7 +28,8 @@ foreach my $i (1 .. $n) {
     (my $disp, $occ) = $ss->display_term($i-1);
     ok(defined $disp,
        "display term $i of $n: '$disp' ($occ occurences)");
-    ok($disp eq $term, "display term $i identical to term");
+    ok(lc($disp) eq lc($term),
+       "display term $i ($disp) equivalent to term ($term)");
 }
 
 $ss->destroy();
@@ -48,7 +49,14 @@ foreach my $i (1 .. $n) {
        "got title term $i of $n: '$term' ($occ occurences)");
     ok($term ge $previous, "title term '$term' ge previous '$previous'");
     $previous = $term;
-    ok((grep { $term eq $_ } @terms), "title term was in term list");
+
+    # Previously we used to assert that the each title-term was
+    # included in the initial term-list that we got by scanning across
+    # all indexes.  Of course this will not in general be true,
+    # because not all terms are title terms, which means that the $n
+    # title terms will include some that are past the end of $n
+    # general terms.  So remove that test.
+    #ok((grep { $term eq $_ } @terms), "title term ($term) was in term list (@terms)");
 }
 
 $ss->destroy();
