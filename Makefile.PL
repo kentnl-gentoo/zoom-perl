@@ -5,9 +5,10 @@ use 5.008;
 use ExtUtils::MakeMaker;
 use strict;
 
-my $yazver = `yaz-config --version`;
-my $yazinc = `yaz-config --cflags threads`;
-my $yazlibs = `yaz-config --libs threads`;
+my $yazconf = "yaz-config";
+my $yazver = `$yazconf --version`;
+my $yazinc = `$yazconf --cflags threads`;
+my $yazlibs = `$yazconf --libs threads`;
 if (!$yazver || !$yazinc || !$yazlibs) {
     die qq[
 ERROR: Unable to call script: yaz-config
@@ -17,7 +18,7 @@ will also need to install "libyaz-dev" in order to build this module.
 }
 
 chomp($yazver);
-check_version($yazver, "2.1.50");
+check_version($yazver, "4.0.0");
 
 # For Windows use
 # $yazinc = '-Ic:\yaz\include';
@@ -40,7 +41,8 @@ WriteMakefile(
     # OBJECT            => '$(O_FILES)', # link all the C files too
 # Use this to test for illegal code that GCC stupidly permits by default:
 #   OPTIMIZE          => "-Wdeclaration-after-statement -g -O0",
-    EXE_FILES    => [ 'samples/zoom/zselect', 'samples/zoom/zoomdump' ],
+    EXE_FILES    => [ 'samples/zoom/zselect', 'samples/zoom/zoomdump',
+		      'samples/zoom/zoom-delete-records' ],
 );
 
 
@@ -64,7 +66,7 @@ __EOT__
 sub MY::postamble { "debian: debian/output
 
 debian/output:
-	dpkg-buildpackage -rfakeroot -d
+	dpkg-buildpackage -us -uc -rfakeroot -d
 	rm -rf debian/output
 	mkdir debian/output
 	mv ../libnet-z3950-zoom-perl* debian/output
